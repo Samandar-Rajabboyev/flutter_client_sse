@@ -23,7 +23,7 @@ class SSEClient {
       required String url,
       required Map<String, String> header,
       StreamController<SSEModel>? oldStreamController,
-      Map<String, dynamic>? body}) {
+      Map<String, dynamic>? body, Function()? onError}) {
     StreamController<SSEModel> streamController = StreamController();
     if (oldStreamController != null) {
       streamController = oldStreamController;
@@ -94,20 +94,24 @@ class SSEClient {
                   case 'retry':
                     break;
                   default:
+                    onError();
                     streamController.addError(Error());
                 }
               },
               onError: (e, s) {
                 print('---ERROR---');
+                onError();
                 streamController.addError(e, s);
               },
             );
         }, onError: (e, s) {
           print('---ERROR---');
+          onError();
           streamController.addError(e, s);
         });
       } catch (e, s) {
-        print('---ERROR---');          
+        print('---ERROR---');
+        onError();
         streamController.addError(e, s);
       }
       return streamController.stream;
