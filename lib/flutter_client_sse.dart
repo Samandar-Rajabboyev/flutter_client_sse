@@ -94,24 +94,24 @@ class SSEClient {
                   case 'retry':
                     break;
                   default:
-                    onError();
+                    if (onError != null) onError!();
                     streamController.addError(Error());
                 }
               },
               onError: (e, s) {
                 print('---ERROR---');
-                onError();
+                if (onError != null) onError!();
                 streamController.addError(e, s);
               },
             );
         }, onError: (e, s) {
           print('---ERROR---');
-          onError();
+          if (onError != null) onError!();
           streamController.addError(e, s);
         });
       } catch (e, s) {
         print('---ERROR---');
-        onError();
+        if (onError != null) onError!();
         streamController.addError(e, s);
       }
       return streamController.stream;
