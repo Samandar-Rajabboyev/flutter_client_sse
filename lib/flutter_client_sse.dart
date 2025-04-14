@@ -94,7 +94,7 @@ class SSEClient {
                   case 'retry':
                     break;
                   default:
-                    
+                    streamController.addError(Error());
                 }
               },
               onError: (e, s) {
