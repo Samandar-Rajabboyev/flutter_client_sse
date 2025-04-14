@@ -10,31 +10,6 @@ part 'sse_event_model.dart';
 class SSEClient {
   static http.Client _client = new http.Client();
 
-  /// Retry the SSE connection after a delay.
-  ///
-  /// [method] is the request method (GET or POST).
-  /// [url] is the URL of the SSE endpoint.
-  /// [header] is a map of request headers.
-  /// [body] is an optional request body for POST requests.
-  /// [streamController] is required to persist the stream from the old connection
-  static void _retryConnection(
-      {required SSERequestType method,
-      required String url,
-      required Map<String, String> header,
-      required StreamController<SSEModel> streamController,
-      Map<String, dynamic>? body}) {
-    print('---RETRY CONNECTION---');
-    Future.delayed(Duration(seconds: 5), () {
-      subscribeToSSE(
-        method: method,
-        url: url,
-        header: header,
-        body: body,
-        oldStreamController: streamController,
-      );
-    });
-  }
-
   /// Subscribe to Server-Sent Events.
   ///
   /// [method] is the request method (GET or POST).
@@ -119,49 +94,21 @@ class SSEClient {
                   case 'retry':
                     break;
                   default:
-                    print('---ERROR---');
-                    print(dataLine);
-                    _retryConnection(
-                      method: method,
-                      url: url,
-                      header: header,
-                      streamController: streamController,
-                    );
+                    
                 }
               },
               onError: (e, s) {
                 print('---ERROR---');
-                print(e);
-                _retryConnection(
-                  method: method,
-                  url: url,
-                  header: header,
-                  body: body,
-                  streamController: streamController,
-                );
+                streamController.addError(e, s);
               },
             );
         }, onError: (e, s) {
           print('---ERROR---');
-          print(e);
-          _retryConnection(
-            method: method,
-            url: url,
-            header: header,
-            body: body,
-            streamController: streamController,
-          );
+          streamController.addError(e, s);
         });
-      } catch (e) {
-        print('---ERROR---');
-        print(e);
-        _retryConnection(
-          method: method,
-          url: url,
-          header: header,
-          body: body,
-          streamController: streamController,
-        );
+      } catch (e, s) {
+        print('---ERROR---');          
+        streamController.addError(e, s);
       }
       return streamController.stream;
     }
